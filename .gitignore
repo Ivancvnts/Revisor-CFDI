@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+config.yaml
+token_cache.json
+estado_procesados.json
+entrada/*
+procesados/*
+reportes/*
+!entrada/.gitkeep
+!procesados/.gitkeep
+!reportes/.gitkeep
