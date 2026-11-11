@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+ Version="4.0" Serie="A" Folio="125" Fecha="2026-11-02T10:00:00" FormaPago="03" MetodoPago="PUE" Moneda="MXN"
+ SubTotal="1000.00" Total="1160.00" TipoDeComprobante="I" Exportacion="01" LugarExpedicion="76000">
+  <cfdi:Emisor Rfc="BBB020202BB1" Nombre="PROVEEDOR MORAL EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="ZZZ010101ZZZ" Nombre="MI EMPRESA" DomicilioFiscalReceptor="64000" RegimenFiscalReceptor="601" UsoCFDI="G01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="80141600" Cantidad="1" ClaveUnidad="E48" Descripcion="Comision por venta" ValorUnitario="1000.00" Importe="1000.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="160.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="160.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="1000.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="160.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="C3D9F0E2-7A1B-4C65-8E24-9B6A5D1F3C78" FechaTimbrado="2026-11-02T10:01:00" RfcProvCertif="AAA010101AAA"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
