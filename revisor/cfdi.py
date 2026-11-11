@@ -54,16 +54,43 @@ class Cfdi:
   uuid: str
   conceptos: list[Concepto]
 
-def a_decimal(texto):
-  return None if not texto else Decimal(texto)
-
-def leer_cfdi(ruta):
-  raiz = ET.parse(ruta).getroot()
-
-  NS = {
+#NameSpaces en los XML de los CFDI 4.0
+NS = {
     "cfdi": "http://www.sat.gob.mx/cfd/4",
     "tfd": "http://www.sat.gob.mx/TimbreFiscalDigital"
   }
+
+#Helper para setear correctamente un valor a None o a Decimal, segun el caso.
+def a_decimal(texto):
+  return None if not texto else Decimal(texto)
+
+#Itera sobre los impuestos y regresa un objeto
+def leer_impuestos(etiqueta_concepto, ruta):
+
+  lista = []
+
+  for etiqueta_impuesto in etiqueta_concepto.findall(ruta, NS):
+    impuesto= etiqueta_impuesto.get('Impuesto')
+    tipo_factor= etiqueta_impuesto.get('TipoFactor')
+    tasa= Decimal(etiqueta_impuesto.get('TasaOCuota'))
+    base= Decimal(etiqueta_impuesto.get('Base'))
+    importe= Decimal(etiqueta_impuesto.get('Importe'))
+
+    impuesto_obj = Impuesto(
+      impuesto=impuesto,
+      tipo_factor=tipo_factor,
+      tasa=a_decimal(tasa),
+      base=base,
+      importe= importe
+    )
+
+    lista.append(impuesto_obj)
+    
+  return lista
+
+#Lee el xml, crea los objetos y las variables necesarias para regresar un objeto de la clase Cfdi
+def leer_cfdi(ruta):
+  raiz = ET.parse(ruta).getroot()
 
   emisor_etiqueta = raiz.find("cfdi:Emisor", NS)
   emisor_nombre = emisor_etiqueta.get("Nombre")
@@ -92,44 +119,8 @@ def leer_cfdi(ruta):
     cantidad= Decimal(etiqueta_concepto.get('Cantidad'))
     valor_unitario= Decimal(etiqueta_concepto.get('ValorUnitario'))
     importe= Decimal(etiqueta_concepto.get('Importe'))
-
-    traslados = []
-
-    for etiqueta_traslado in etiqueta_concepto.findall("cfdi:Impuestos/cfdi:Traslados/cfdi:Traslado", NS):
-      impuesto= etiqueta_traslado.get('Impuesto')
-      tipo_factor= etiqueta_traslado.get('TipoFactor')
-      tasa= Decimal(etiqueta_traslado.get('TasaOCuota'))
-      base= Decimal(etiqueta_traslado.get('Base'))
-      importe_traslado= Decimal(etiqueta_traslado.get('Importe'))
-
-      traslado = Impuesto(
-        impuesto=impuesto,
-        tipo_factor=tipo_factor,
-        tasa=a_decimal(tasa),
-        base=base,
-        importe= importe_traslado
-      )
-
-      traslados.append(traslado)
-
-    retenciones = []
-    
-    for etiqueta_retencion in etiqueta_concepto.findall("cfdi:Impuestos/cfdi:Retenciones/cfdi:Retencion", NS):
-      impuesto= etiqueta_retencion.get('Impuesto')
-      tipo_factor= etiqueta_retencion.get('TipoFactor')
-      tasa= Decimal(etiqueta_retencion.get('TasaOCuota'))
-      base= Decimal(etiqueta_retencion.get('Base'))
-      importe_retencion= Decimal(etiqueta_retencion.get('Importe'))
-
-      retencion = Impuesto(
-        impuesto=impuesto,
-        tipo_factor=tipo_factor,
-        tasa=a_decimal(tasa),
-        base=base,
-        importe= importe_retencion
-      )
-
-      retenciones.append(retencion)
+    traslados = leer_impuestos(etiqueta_concepto, "cfdi:Impuestos/cfdi:Traslados/cfdi:Traslado")
+    retenciones = leer_impuestos(etiqueta_concepto, "cfdi:Impuestos/cfdi:Retenciones/cfdi:Retencion")
 
     concepto = Concepto(
       clave_prod_serv=clave_prod_serv,
