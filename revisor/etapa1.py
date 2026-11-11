@@ -11,13 +11,15 @@ NS = {
 
 emisorTag = raiz.find("cfdi:Emisor", NS)
 emisorName = emisorTag.get("Nombre")
-emisorRFC = emisorTag.get("Rfc") 
+emisorRFC = emisorTag.get("Rfc")
 emisorRegimen = emisorTag.get("RegimenFiscal")
 
 receptorTag = raiz.find("cfdi:Receptor", NS)
 receptorName = receptorTag.get("Nombre")
-receptorRFC = receptorTag.get("Rfc") 
-receptorRegimen = receptorTag.get("RegimenFiscal")
+receptorRFC = receptorTag.get("Rfc")
+receptorCP = receptorTag.get("DomicilioFiscalReceptor")
+receptorRegimen = receptorTag.get("RegimenFiscalReceptor")
+receptorUso = receptorTag.get("UsoCFDI")
 
 timbreFiscalDigital = raiz.find("cfdi:Complemento", NS).find("tfd:TimbreFiscalDigital", NS)
 
