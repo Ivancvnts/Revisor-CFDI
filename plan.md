@@ -91,7 +91,7 @@ Outlook solo es otra forma de llenar entrada/; el resto no cambia.
 
 - [x] Etapa 1
 - [x] Etapa 2
-- [ ] Etapa 3
+- [x] Etapa 3
 - [ ] Etapa 4
 - [ ] Etapa 5
 - [ ] Etapa 6
