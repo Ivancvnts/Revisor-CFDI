@@ -1,13 +1,11 @@
 import sys
+
 from defusedxml import ElementTree as ET
 
 ruta = sys.argv[1]
 raiz = ET.parse(ruta).getroot()
 
-NS = {
-  "cfdi": "http://www.sat.gob.mx/cfd/4",
-  "tfd": "http://www.sat.gob.mx/TimbreFiscalDigital"
-}
+NS = {"cfdi": "http://www.sat.gob.mx/cfd/4", "tfd": "http://www.sat.gob.mx/TimbreFiscalDigital"}
 
 emisorTag = raiz.find("cfdi:Emisor", NS)
 emisorName = emisorTag.get("Nombre")

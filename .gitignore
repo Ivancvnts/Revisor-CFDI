@@ -7,6 +7,7 @@ estado_procesados.json
 entrada/*
 procesados/*
 reportes/*
+tests/__pycache__
 !entrada/.gitkeep
 !procesados/.gitkeep
 !reportes/.gitkeep
