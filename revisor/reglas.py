@@ -2,15 +2,20 @@ from dataclasses import dataclass
 
 OK, AVISO, ERROR = "ok", "aviso", "error"
 
+# CONSTANTES RECEPTOR POSTERIORMENTE SE TOMAN DE CONFIG
 RECEPTOR_RFC = "AAA010101AAA"
 RECEPTOR_CP = "76000"
 RECEPTOR_REGIMEN = "601"
 USO_CFDI = "G03"
-
+# CONSTANTES METODO Y FORMA DE PAGO POSTERIORMENTE SE TOMAN DE CONFIG
 PAGOS_PERMITIDOS = {
     "PUE": ["03"],
     "PPD": ["99"],
 }
+# CONSTANTES CONCEPTO POSTERIORMENTE SE TOMAN DE CONFIG
+CLAVE_PROD_SERV_PERMITIDAS = ["80141628", "80141600"]
+UNIDAD_ESPERADA = "E48"
+OBJETO_IMP_ESPERADO = "02"
 
 
 @dataclass
@@ -88,8 +93,48 @@ def revisar_pago(cfdi):
     return hallazgos
 
 
+def revisar_conceptos(cfdi):
+    hallazgos = []
+
+    for indice, concepto in enumerate(cfdi.conceptos, start=1):
+        campos_con_errores = []
+
+        if concepto.clave_prod_serv not in CLAVE_PROD_SERV_PERMITIDAS:
+            campos_con_errores.append("Clave de producto o servicio")
+
+        if concepto.clave_unidad != UNIDAD_ESPERADA:
+            campos_con_errores.append("Clave de unidad")
+
+        if concepto.objeto_imp != OBJETO_IMP_ESPERADO:
+            campos_con_errores.append("Objeto de impuesto")
+
+        if not campos_con_errores:
+            continue
+
+        hallazgos.append(
+            Hallazgo(
+                nivel=ERROR,
+                campo=f"Concepto {indice}",
+                mensaje=f"Errores en {', '.join(campos_con_errores)}",
+            )
+        )
+
+    if not hallazgos:
+        cantidad_conceptos = len(cfdi.conceptos)
+        hallazgos.append(
+            Hallazgo(
+                nivel=OK,
+                campo="Conceptos",
+                mensaje=f"{cantidad_conceptos} concepto{'' if cantidad_conceptos == 1 else 's'} sin errores",
+            )
+        )
+
+    return hallazgos
+
+
 def validar(cfdi):
     hallazgos = []
     hallazgos += revisar_receptor(cfdi)
     hallazgos += revisar_pago(cfdi)
+    hallazgos += revisar_conceptos(cfdi)
     return hallazgos

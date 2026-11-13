@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from revisor.cfdi import leer_cfdi
-from revisor.reglas import AVISO, ERROR, OK, revisar_pago, revisar_receptor
+from revisor.reglas import AVISO, ERROR, OK, revisar_conceptos, revisar_pago, revisar_receptor
 
 EJEMPLOS = Path(__file__).parent.parent / "ejemplos"
 
@@ -18,7 +18,7 @@ def niveles(hallazgos):
     return [h.nivel for h in hallazgos]
 
 
-# TEST DE METODO Y FORMA DE PAGO
+# TESTS DE METODO Y FORMA DE PAGO
 def test_pago_correcto(cfdi_moral):
     assert niveles(revisar_pago(cfdi_moral)) == [OK]
 
@@ -40,11 +40,11 @@ def test_pago(cfdi_moral, metodo, forma, esperado):
     assert niveles(revisar_pago(cfdi)) == esperado
 
 
+# TESTS DE RECEPTOR
 def test_receptor_correcto(cfdi_moral):
     assert niveles(revisar_receptor(cfdi_moral)) == [OK, OK, OK, OK]
 
 
-# TEST DE RECEPTOR
 @pytest.mark.parametrize(
     "atributo, valor, campo_error",
     [
@@ -60,3 +60,41 @@ def test_receptor_incorrecto(cfdi_moral, atributo, valor, campo_error):
     hallazgos = revisar_receptor(cfdi)
     errores = [h.campo for h in hallazgos if h.nivel == ERROR]
     assert errores == [campo_error]
+
+
+# TESTS DE CONCEPTOS
+
+
+def test_conceptos_correcto(cfdi_moral):
+    assert niveles(revisar_conceptos(cfdi_moral)) == [OK]
+
+
+@pytest.mark.parametrize(
+    "atributo, valor, campo_error",
+    [
+        pytest.param(
+            "clave_prod_serv",
+            "10101010",
+            "Clave de producto o servicio",
+            id="clave_prod_serv_incorrecta",
+        ),
+        pytest.param("clave_unidad", "E49", "Clave de unidad", id="clave_unidad_incorrecta"),
+        pytest.param("objeto_imp", "009", "Objeto de impuesto", id="objeto_imp_incorrecto"),
+    ],
+)
+def test_concepto_incorrecto(cfdi_moral, atributo, valor, campo_error):
+    concepto = cfdi_moral.conceptos[0]
+    concepto_malo = replace(concepto, **{atributo: valor})
+    cfdi = replace(cfdi_moral, conceptos=[concepto_malo])
+    hallazgos = revisar_conceptos(cfdi)
+    assert niveles(hallazgos) == [ERROR]
+    assert campo_error in hallazgos[0].mensaje
+
+
+# Comprueba que solo se marca el concepto malo y el bueno no genera hallazgos
+def test_dos_conceptos_uno_malo(cfdi_moral):
+    primero = cfdi_moral.conceptos[0]
+    segundo_malo = replace(primero, clave_unidad="E49")
+    cfdi = replace(cfdi_moral, conceptos=[primero, segundo_malo])
+    hallazgos = revisar_conceptos(cfdi)
+    assert [h.campo for h in hallazgos] == ["Concepto 2"]
